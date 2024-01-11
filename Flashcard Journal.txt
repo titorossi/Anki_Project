@@ -1,0 +1,17 @@
+Flashcard Journal
+
+Day 1:
+
+Set up the anki note model template as well as a script which will create a flashcard using the said template.
+Took me a long time to find a good most frequently used 5000 words list (as I wanted them in order of frequency) but I eventually found one that aptly suited my needs, *(The Romance Languages and their Structures. First Series_ F.S. I1) Alphonse Juilland_ Vicenzo Traversa_ Antonio Beltramo_ Sebastiano di Blasi - Frequency dictionary of Italian words-De Gruyter Mouton*
+Used https://www.ilovepdf.com/ to extract my desired pages from the original pdf.
+converted the pdf into csv using https://convertio.co/pdf-csv/.
+
+Day 2:
+There are a few errors with the csv file. The extractor seemed to struggle with words containing accents, often replacing them with the letter Ã or symbols such as ¬. There are also more inconsistent errors. I began by removing all excess lines by removing all lines that do not start with numbers. I then removed all numbers. This left me with a few lines containing only whitespace which I tried to remove, but couldn't. After using print(repr(line)) i found out that i had the two following types of lines.
+
+'   valente adj.         .   lucente adj.          cumulo n.           .;;;;;;\n'
+';;;;;;\n'
+
+It worked, however I noticed that I only had 5011 lines instead of 5014, this means that I must have lost 3 words in the process of cleaning. However since it is only an extremely minor % I will move on, I do not think it is worth the time or effort to try and find the missing 3 words as I don't even know where I could start and if it would even be possible.
+I then removed all excess writing and whitespace from the rows, leaving me with only the words from the usage column.

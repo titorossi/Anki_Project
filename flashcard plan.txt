@@ -1,0 +1,15 @@
+create an akni note template using code.***
+make/use a scraper to get most common 5000 words and put into a txt file (in freq order).
+
+read line by line and make flashcard from txt file:
+prompt api to generate a phrase using the word. (random conjugation)
+prompt api to also speak the phrase and save the recording.
+prompt api to translate the phrase into english.
+prompt api to give dictionary definition of the word in the foreign language.
+temp save these generations and put them into a flashcard.
+
+
+
+give option for inputing a txt file or copy pasting words.
+ask for desired language.
+ask for api key.
