@@ -8,6 +8,7 @@ Used https://www.ilovepdf.com/ to extract my desired pages from the original pdf
 converted the pdf into csv using https://convertio.co/pdf-csv/.
 
 Day 2:
+
 There are a few errors with the csv file. The extractor seemed to struggle with words containing accents, often replacing them with the letter Ã or symbols such as ¬. There are also more inconsistent errors. I began by removing all excess lines by removing all lines that do not start with numbers. I then removed all numbers. This left me with a few lines containing only whitespace which I tried to remove, but couldn't. After using print(repr(line)) i found out that i had the two following types of lines.
 
 '   valente adj.         .   lucente adj.          cumulo n.           .;;;;;;\n'
