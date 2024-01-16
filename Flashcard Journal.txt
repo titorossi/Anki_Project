@@ -16,3 +16,8 @@ There are a few errors with the csv file. The extractor seemed to struggle with 
 
 It worked, however I noticed that I only had 5011 lines instead of 5014, this means that I must have lost 3 words in the process of cleaning. However since it is only an extremely minor % I will move on, I do not think it is worth the time or effort to try and find the missing 3 words as I don't even know where I could start and if it would even be possible.
 I then removed all excess writing and whitespace from the rows, leaving me with only the words from the usage column.
+
+Day 3:
+
+I began with trying to remove the few excess symbols in the document of which I saw only three of: "© ¨ ¬". I wrote some code which allowed me to remove these symbols while keeping the accented symbols (e.g. Ã, é) that I needed. After running the code I found that all of the symbols were removed and somehow the Ã's were replaced with what looks to be the correct accented letters. This is strange and I'm not too sure why, perhaps its due to the python library understanding Ã to represent any accented letter and it then replaced it accurately taking the letters surrounding it in context (which was going to be my plan, utilising the original document as a reference point).
+I tried for a while to compare the words in my file to the original file as well as a txt version of the file, to check if my words are correct. However, I could not complete this task due to the original file being so odd (which is perhaps why I had such a difficult time with the csv file). So I have manually checked and removed the one error I knew existed (J being at the end of a word). I may come back to this if I notice more errors in the future, however, for now this section seems to be complete.
