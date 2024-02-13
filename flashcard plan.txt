@@ -1,5 +1,5 @@
 create an akni note template using code.***
-make/use a scraper to get most common 5000 words and put into a txt file (in freq order).
+make/use a scraper to get most common 5000 words and put into a txt file (in freq order). ***
 
 read line by line and make flashcard from txt file:
 prompt api to generate a phrase using the word. (random conjugation)
