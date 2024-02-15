@@ -28,8 +28,6 @@ phrase_completion = client.chat.completions.create(
 )
 generated_phrase = phrase_completion.choices[0].message.content
 
-print("Generated phrase:", generated_phrase)
-
 # Translate the phrase into English
 translation_completion = client.chat.completions.create(
   model="gpt-3.5-turbo",
@@ -40,8 +38,6 @@ translation_completion = client.chat.completions.create(
 )
 translated_phrase = translation_completion.choices[0].message.content
 
-print("Translated phrase:", translated_phrase)
-
 # Get dictionary definition of the word in the desired foreign language
 definition_completion = client.chat.completions.create(
   model="gpt-3.5-turbo",
@@ -51,8 +47,6 @@ definition_completion = client.chat.completions.create(
   ]
 )
 word_definition = definition_completion.choices[0].message.content
-
-print("Word definition:", word_definition)
 
 # Print the results
 print("Word:", word)
