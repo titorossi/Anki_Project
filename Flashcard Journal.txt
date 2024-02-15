@@ -26,3 +26,6 @@ I noticed some words being capitalised. I edited my code to make them into lower
 Day 4:
 
 Used code from api reference by chatgpt to make a basic text to speech generator. Tested all of the voices and they all sounded a bit odd and had foreign accents probably because they are optimised for english. So I decided on the google cloud api as an option due to the voices sounding good and the service being free.
+
+Day 5:
+Organised my project directory a little bit, watched videos on how to use google tts and ".gitignore". I have also decided on setting my api key as a permanent environmental variable on my computer as it is easier to use, it is my current only google project and it ensures that my api key is secure and not visible in git. I have also created a "Private" folder which contains my api key and any other sensitive information, it will be ignored so I can securely use my api key(s).
