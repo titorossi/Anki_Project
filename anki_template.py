@@ -1,7 +1,7 @@
 import requests
 import json
 
-def create_anki_model(model_name, front_html, back_html, css):
+def create_anki_model(model_name, front_html, back_html, front_html_2, back_html_2, css):
     payload = {
         "action": "createModel",
         "version": 6,
@@ -11,9 +11,14 @@ def create_anki_model(model_name, front_html, back_html, css):
             "css": css,
             "cardTemplates": [
                 {
-                    "Name": "Card 1",
+                    "Name": "Productive",
                     "Front": front_html,
                     "Back": back_html
+                },
+                {
+                    "Name": "Receptive",
+                    "Front": front_html_2,
+                    "Back": back_html_2
                 }
             ]
         }
@@ -23,14 +28,16 @@ def create_anki_model(model_name, front_html, back_html, css):
 
 # Replace 'your_model_name' with the desired name of your Anki model
 model_name = "your_model_name"
-field_names = ["Native word", "Native phrase", "Foreign word", "Foreign phrase", "Foreign phrase audio", "Definition"]
+field_names = ["Native word", "Native phrase", "Foreign word", "Foreign word audio", "Foreign phrase", "Foreign phrase audio", "Definition"]
+
+# Front and back for the productive cards
 front_html = """
 {{Native word}}<br>
 <div class="line"></div>
 {{Native phrase}}
 
 {{#Definition}}
-    <div class="definition" onclick="toggleShow(this)">
+    <div class="toggle-content" onclick="toggleShow(this)">
         <p class="trigger">[ Definition ]</p>
         <p class="payload">{{Definition}}</p>
     </div>
@@ -47,6 +54,7 @@ back_html = """
 <hr id=answer>
 
 {{Foreign word}}<br>
+{{Foreign word audio}}<br>
 <div class="line"></div>
 {{Foreign phrase}}<br>
 {{Foreign phrase audio}}
@@ -55,6 +63,37 @@ back_html = """
 
 <hr>
 """
+
+# Front and back for the receptive cards
+front_html_2 = """
+{{Foreign word}}<br>
+{{Foreign word audio}}
+
+
+	<div class="toggle-content" onclick="toggleShow(this)">
+		<p class="trigger">[ Phrase ]</p>
+		<p class="payload">{{Foreign phrase}}<br>{{Foreign phrase audio}}</p>
+	</div>
+	<script>
+		function toggleShow(element) {
+            element.classList.toggle('shown');
+        }
+	</script>
+"""
+back_html_2 = """
+{{FrontSide}}
+
+<hr id=answer>
+
+{{Native word}}<br>
+<div class="line"></div>
+{{Native phrase}}
+
+<p>{{Foreign phrase}}<br>{{Foreign phrase audio}}</p>
+
+<hr>
+"""
+
 css = """
 .card {
     font-family: arial;
@@ -69,7 +108,7 @@ css = """
     text-align: center; 
 }
 
-.definition {
+.toggle-content {
     background: #f2fbe7; 
     border: 1px solid #dff5c4; 
     border-radius: 6px; 
@@ -77,21 +116,21 @@ css = """
     cursor: pointer;
 }
 
-.definition:hover {
+.toggle-content:hover {
     background: #dff5c4; 
     color: #000;
 }
 
-.definition .payload {
+.toggle-content .payload {
     display: none;
 }
 
-.definition.shown {
+.toggle-content.shown {
     background: #fff; 
     color: #000;
 }
 
-.definition.shown .payload {
+.toggle-content.shown .payload {
     display: block;
     max-height: 150px;
     overflow-y: auto;
@@ -104,5 +143,5 @@ css = """
 }
 """
 
-result = create_anki_model(model_name, front_html, back_html, css)
+result = create_anki_model(model_name, front_html, back_html, front_html_2, back_html_2, css)
 print(result)

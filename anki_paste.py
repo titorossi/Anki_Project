@@ -9,7 +9,7 @@ def invoke(action, params={}):
 def add_note(deck_name, fields):
     note = {
         "deckName": deck_name,
-        "modelName": "Artillery",
+        "modelName": "your_model_name",
         "fields": fields,
         "options": {
             "allowDuplicate": False
@@ -24,6 +24,7 @@ fields = {
     "Native phrase": "Ciao, come stai?",
     "Definition": "A common Italian greeting.",
     "Foreign word": "hello",
+    "Foreign word audio": "[sound:example_audio.mp3]",
     "Foreign phrase": "Hello, how are you?",
     "Foreign phrase audio": "[sound:example_audio.mp3]"
 }
