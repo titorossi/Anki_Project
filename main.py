@@ -1,13 +1,19 @@
 from text_speech import synthesize_speech
 from gpt_to_ita import generate_phrase_and_translate
 from word_reader import read_words_from_file
+from anki_template import create_anki_model
 
+# Create Anki model
+create_anki_model()
+
+# Read words from file
 file_path = r"C:\Users\titot\Desktop\PMW\Anki_Project\Texts\3_words.txt"
 words = read_words_from_file(file_path)
 
+# Set language
 language = "Italian"
 
-
+# Generate phrases and translations
 for i, word in enumerate(words):
     word, generated_phrase, translated_phrase, word_definition = generate_phrase_and_translate(word, language)
     print(f"Word: {word}")
