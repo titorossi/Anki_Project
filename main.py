@@ -20,11 +20,13 @@ language = "Italian"
 # Generate phrases and translations
 for i, word in enumerate(words):
     word, generated_phrase, translated_word, translated_phrase, word_definition = generate_phrase_and_translate(word, language)
-    print(f"Word: {word}")
-    print(f"Generated phrase: {generated_phrase}")
-    print(f"Translated word: {translated_word}")
-    print(f"Translated phrase: {translated_phrase}")
-    print(f"Word definition: {word_definition}")
+
+    # Printing the results for debugging
+    # print(f"Word: {word}")
+    # print(f"Generated phrase: {generated_phrase}")
+    # print(f"Translated word: {translated_word}")
+    # print(f"Translated phrase: {translated_phrase}")
+    # print(f"Word definition: {word_definition}")
     
     # Synthesize speech returns the binary audio content
     word_audio = synthesize_speech(word)
@@ -45,4 +47,7 @@ for i, word in enumerate(words):
     }
 
     result = add_note(deck_name, model_name, fields)
-    print(result)
+
+    # Check if there is an error in the response
+    if result.get('error') is not None:
+        print(f"Error occurred at number {i} with the word ({word}): {result['error']}")
