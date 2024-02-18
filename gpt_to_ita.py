@@ -29,7 +29,7 @@ def generate_phrase_and_translate(word, language):
     translation_completion = client.chat.completions.create(
       model="gpt-3.5-turbo",
       messages=[
-        {"role": "system", "content": "Translate the following phrase into English. Do not provide anything else."},
+        {"role": "system", "content": f"Translate the following '{language}' phrase into English. Do not provide anything else."},
         {"role": "user", "content": generated_phrase}
       ]
     )
@@ -39,7 +39,7 @@ def generate_phrase_and_translate(word, language):
     word_translation_completion = client.chat.completions.create(
       model="gpt-3.5-turbo",
       messages=[
-        {"role": "system", "content": "Translate the following word into English. Do not provide anything else."},
+        {"role": "system", "content": f"Translate the following '{language}' word into English. Do not provide anything else."},
         {"role": "user", "content": word}
       ]
     )
