@@ -26,16 +26,4 @@ def add_note(deck_name, model_name, fields):
         },
         "tags": []
     }
-    invoke('addNote', {'note': note})
-
-# Example usage:
-fields = {
-    "Native word": "ciao",
-    "Native phrase": "Ciao, come stai?",
-    "Definition": "A common Italian greeting.",
-    "Foreign word": "hello",
-    "Foreign word audio": "[sound:example_audio.mp3]",
-    "Foreign phrase": "Hello, how are you?",
-    "Foreign phrase audio": "[sound:example_audio.mp3]"
-}
-add_note("test", fields)
+    return invoke('addNote', {'note': note})
