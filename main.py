@@ -11,7 +11,7 @@ create_anki_model(model_name)
 create_deck(deck_name)
 
 # Read words from file. Replace "file_path" with the path to your file (keep the "r" before the string)
-file_path = r"C:\Users\titot\Desktop\PMW\Anki_Project\Texts\3_words.txt"
+file_path = r"C:\Users\titot\Desktop\PMW\Anki_Project\Texts\final_word_set.txt"
 words = read_words_from_file(file_path)
 
 # Set language
