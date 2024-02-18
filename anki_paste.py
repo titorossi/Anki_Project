@@ -29,7 +29,7 @@ def add_note(deck_name, model_name, fields):
         "modelName": model_name,
         "fields": fields,
         "options": {
-            "allowDuplicate": False
+            "allowDuplicate": True
         },
         "tags": []
     }
