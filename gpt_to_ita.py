@@ -35,6 +35,16 @@ def generate_phrase_and_translate(word, language):
     )
     translated_phrase = translation_completion.choices[0].message.content
 
+    # Translate the word into English
+    word_translation_completion = client.chat.completions.create(
+      model="gpt-3.5-turbo",
+      messages=[
+        {"role": "system", "content": "Translate the following word into English. Do not provide anything else."},
+        {"role": "user", "content": word}
+      ]
+    )
+    translated_word = word_translation_completion.choices[0].message.content
+
     # Get dictionary definition of the word in the desired foreign language
     definition_completion = client.chat.completions.create(
       model="gpt-3.5-turbo",
@@ -45,4 +55,4 @@ def generate_phrase_and_translate(word, language):
     )
     word_definition = definition_completion.choices[0].message.content
 
-    return word, generated_phrase, translated_phrase, word_definition
+    return word, generated_phrase, translated_word, translated_phrase, word_definition

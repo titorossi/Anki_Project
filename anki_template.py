@@ -1,9 +1,8 @@
 import requests
 import json
 
-def create_anki_model():
-    #Replace the model_name with your desired model name
-    model_name = "your_model_name"
+def create_anki_model(model_name):
+    # The field names for the model
     field_names = ["Native word", "Native phrase", "Foreign word", "Foreign word audio", "Foreign phrase", "Foreign phrase audio", "Definition"]
 
     # Front and back for the productive cards
