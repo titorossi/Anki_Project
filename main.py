@@ -2,12 +2,15 @@ from text_speech import synthesize_speech
 from gpt_to_ita import generate_phrase_and_translate
 from word_reader import read_words_from_file
 from anki_template import create_anki_model
-from anki_paste import add_note, upload_audio_to_anki
+from anki_paste import add_note, upload_audio_to_anki, create_deck
 
-# Create Anki model and replace "your_model_name" with the name of your model
-create_anki_model("your_model_name")
+# Create Anki model and deck. Replace "your_model_name" and "deckname" with your desired names
+model_name = "your_model_name"
+deck_name = "your_deck_name"
+create_anki_model(model_name)
+create_deck(deck_name)
 
-# Read words from file
+# Read words from file. Replace "file_path" with the path to your file (keep the "r" before the string)
 file_path = r"C:\Users\titot\Desktop\PMW\Anki_Project\Texts\3_words.txt"
 words = read_words_from_file(file_path)
 
@@ -41,4 +44,5 @@ for i, word in enumerate(words):
         "Definition": word_definition
     }
 
-    add_note("deckname", "your_model_name", fields)
+    result = add_note(deck_name, model_name, fields)
+    print(result)
