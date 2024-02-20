@@ -40,3 +40,5 @@ While before my deck was being automatically created it is not anymore, so I nee
 Error occurred at number 2 with the word (la): cannot create note because it is a duplicate
 Error occurred at number 8 with the word (lo): cannot create note because it is a duplicate
 This is likely due to them having the same translations to other words that are already in the anki notes, at first it seemed acceptable but then too many words were filtering through so I have decided to tell anki to allow duplicates. This shouldnt create a problem as there shouldnt be any words that are actual duplicates.
+
+Day 9: Ran the program yesterday it took, around 20 hours to complete, looking at the flashcards though there seem to be no errors and all words have been used. Success!
