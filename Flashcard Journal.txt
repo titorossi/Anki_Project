@@ -56,3 +56,5 @@ Give your best every day.
 Da il meglio di te ogni giorno.
 
 Since I separately called the translations, the instance of chatgpt that translated the phrases must have not understood that the "si" and "da" were the key words in the sentences and just translated the phrase in an understandable manner. This resulted those words getting lost in translation, however I think it should only be a problem for the simpler words. I think it may have also happened to "da" due to the many translations the word could have.
+
+Day 11: After some usage I have found some words containing "Ã" and some excess symbols. I have checked my word sets and they both look fine so I cannot figure out why 130 of my words were read containing "Ã". Though I do not think the program is at fault here.
