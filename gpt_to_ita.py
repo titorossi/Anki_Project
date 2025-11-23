@@ -1,58 +1,60 @@
-from openai import OpenAI
-import random
+import google.generativeai as genai
+import os
+from concurrent.futures import ThreadPoolExecutor
+import time
 
-def generate_phrase_and_translate(word, language):
-    client = OpenAI()
+def generate_phrase_and_translate(word, language, model=None):
+    # Configure Gemini API and create model if not provided
+    if model is None:
+        genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
+        model = genai.GenerativeModel('gemini-2.5-flash')
 
-    # Generate a random number to determine whether the word will be conjugated or not
-    conjugation_choice = random.randint(0, 3)
+    # Define all 4 prompts
+    phrase_prompt = f"""Generate a concise, natural {language} phrase (5-12 words) using the word '{word}' at CEFR B1-B2 level.
 
-    # Define the conjugation instruction based on the random number
-    if conjugation_choice == 0:
-        # 0 means no conjugation
-        conjugation_instruction = f"In '{language}', generate a phrase using the given word without conjugation. Generate only the phrase in the given language, do not provide anything else."
-    else:
-        # 1, 2, 3 mean random conjugation
-        conjugation_instruction = f"In '{language}', generate a phrase using the given word, if the word is a verb, give it a random conjugation. Generate only the phrase in the given language, do not provide anything else."
+Requirements:
+- Use intermediate vocabulary and common grammatical structures
+- Make it conversational and practical
+- Keep it brief and clear
+- Use the word naturally (conjugate verbs as needed)
+- Return ONLY the {language} phrase, nothing else"""
+    
+    # Helper function to make API call with retry logic
+    def call_api_with_retry(prompt, max_retries=3):
+        for attempt in range(max_retries):
+            try:
+                response = model.generate_content(prompt)
+                return response.text.strip()
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    raise
+                wait_time = (2 ** attempt) * 1  # Exponential backoff: 1s, 2s, 4s
+                time.sleep(wait_time)
+        return ""
+    
+    # First, generate the phrase (needed for subsequent calls)
+    generated_phrase = call_api_with_retry(phrase_prompt)
+    
+    # Now make the 3 remaining calls in parallel
+    phrase_translation_prompt = f"Translate this {language} phrase to natural English: {generated_phrase}\n\nProvide ONLY the English translation, nothing else."
+    word_translation_prompt = f"Translate this {language} word to English: {word}\n\nProvide ONLY the English translation (one or two words), nothing else."
+    definition_prompt = f"""Provide a concise {language} dictionary definition for '{word}' suitable for CEFR B1-B2 learners.
 
-    # Generate a phrase using the word in the desired foreign language
-    phrase_completion = client.chat.completions.create(
-      model="gpt-3.5-turbo",
-      messages=[
-        {"role": "system", "content": conjugation_instruction},
-        {"role": "user", "content": f"Generate a phrase using '{word}'."}
-      ]
-    )
-    generated_phrase = phrase_completion.choices[0].message.content
-
-    # Translate the phrase into English
-    translation_completion = client.chat.completions.create(
-      model="gpt-3.5-turbo",
-      messages=[
-        {"role": "system", "content": f"Translate the following '{language}' phrase into English. Do not provide anything else."},
-        {"role": "user", "content": generated_phrase}
-      ]
-    )
-    translated_phrase = translation_completion.choices[0].message.content
-
-    # Translate the word into English
-    word_translation_completion = client.chat.completions.create(
-      model="gpt-3.5-turbo",
-      messages=[
-        {"role": "system", "content": f"Translate the following '{language}' word into English. Do not provide anything else."},
-        {"role": "user", "content": word}
-      ]
-    )
-    translated_word = word_translation_completion.choices[0].message.content
-
-    # Get dictionary definition of the word in the desired foreign language
-    definition_completion = client.chat.completions.create(
-      model="gpt-3.5-turbo",
-      messages=[
-        {"role": "system", "content": f"Provide a dictionary definition of the given word in '{language}'. Do not include the word in the definition and do not include any notes, provide only the definition."},
-        {"role": "user", "content": f"Define '{word}'."}
-      ]
-    )
-    word_definition = definition_completion.choices[0].message.content
+Requirements:
+- Write in clear, intermediate-level {language}
+- Keep it brief (1-2 sentences maximum)
+- Do NOT include the word itself in the definition
+- Do NOT add notes or examples
+- Return ONLY the definition"""
+    
+    # Execute the 3 remaining API calls in parallel
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        phrase_translation_future = executor.submit(call_api_with_retry, phrase_translation_prompt)
+        word_translation_future = executor.submit(call_api_with_retry, word_translation_prompt)
+        definition_future = executor.submit(call_api_with_retry, definition_prompt)
+        
+        translated_phrase = phrase_translation_future.result()
+        translated_word = word_translation_future.result()
+        word_definition = definition_future.result()
 
     return word, generated_phrase, translated_word, translated_phrase, word_definition

@@ -1,0 +1,59 @@
+vocab
+chatgpt
+TTS word
+TTS sentence
+deepl
+dictionary
+
+NEXT WORD IS
+ampio
+
+
+PRODUCTIVE
+
+Front Side
+native word
+native phrase
+
+definition in foreign language (toggle to show)
+
+Back Side
+all of front side
+foreign word
+foreign word audio
+foreign phrase
+foreign phrase audio
+
+
+RECEPTIVE
+
+Front Side
+foreign word
+foreign word audio
+foreign phrase
+foreign phrase audio
+
+definition in foreign language (toggle to show)
+
+Back side
+all of front side
+native word
+native phrase
+
+
+????????????
+
+Front Side
+native word
+native phrase
+
+Definition (Click to show)
+definition in foreign language (necessary?)
+
+Back Side
+foreign word
+foreign word audio
+
+Phrase (Click to show)
+foreign phrase
+foreign phrase audio

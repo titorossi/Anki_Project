@@ -1,0 +1,17 @@
+create an akni note template using code. DONE
+make/use a scraper to get most common 5000 words and put into a txt file (in freq order). DONE
+
+read line by line and make flashcard from txt file: NEXT STEP
+prompt gpt api to generate a phrase using the word. (random conjugation) DONE
+prompt gpt api to translate the phrase into english. DONE
+prompt gpt api to give dictionary definition of the word in the foreign language. DONE
+prompt google api to speak the foreign word and phrase and save the recording. DONE
+
+figure out how to save the generated things into temporary variables so they can be saved into anki as well as used by the google api (as well as saving and using googles generation temporarily and not onto the pc).
+
+
+
+
+give option for inputing a txt file or copy pasting words.
+ask for desired language.
+ask for api key.

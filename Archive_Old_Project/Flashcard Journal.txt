@@ -1,0 +1,60 @@
+Flashcard Journal
+
+Day 1:
+
+Set up the anki note model template as well as a script which will create a flashcard using the said template.
+Took me a long time to find a good most frequently used 5000 words list (as I wanted them in order of frequency) but I eventually found one that aptly suited my needs, *(The Romance Languages and their Structures. First Series_ F.S. I1) Alphonse Juilland_ Vicenzo Traversa_ Antonio Beltramo_ Sebastiano di Blasi - Frequency dictionary of Italian words-De Gruyter Mouton*
+Used https://www.ilovepdf.com/ to extract my desired pages from the original pdf.
+converted the pdf into csv using https://convertio.co/pdf-csv/.
+
+Day 2:
+
+There are a few errors with the csv file. The extractor seemed to struggle with words containing accents, often replacing them with the letter Ã or symbols such as ¬. There are also more inconsistent errors. I began by removing all excess lines by removing all lines that do not start with numbers. I then removed all numbers. This left me with a few lines containing only whitespace which I tried to remove, but couldn't. After using print(repr(line)) i found out that i had the two following types of lines.
+
+'   valente adj.         .   lucente adj.          cumulo n.           .;;;;;;\n'
+';;;;;;\n'
+
+It worked, however I noticed that I only had 5011 lines instead of 5014, this means that I must have lost 3 words in the process of cleaning. However since it is only an extremely minor % I will move on, I do not think it is worth the time or effort to try and find the missing 3 words as I don't even know where I could start and if it would even be possible.
+I then removed all excess writing and whitespace from the rows, leaving me with only the words from the usage column.
+
+Day 3:
+
+I began with trying to remove the few excess symbols in the document of which I saw only three of: "© ¨ ¬". I wrote some code which allowed me to remove these symbols while keeping the accented symbols (e.g. Ã, é) that I needed. After running the code I found that all of the symbols were removed and somehow the Ã's were replaced with what looks to be the correct accented letters. This is strange and I'm not too sure why, perhaps its due to the python library understanding Ã to represent any accented letter and it then replaced it accurately taking the letters surrounding it in context (which was going to be my plan, utilising the original document as a reference point).
+I tried for a while to compare the words in my file to the original file as well as a txt version of the file, to check if my words are correct. However, I could not complete this task due to the original file being so odd (which is perhaps why I had such a difficult time with the csv file). So I have manually checked and removed the one error I knew existed (J being at the end of a word). I may come back to this if I notice more errors in the future, however, for now this section seems to be complete.
+I noticed some words being capitalised. I edited my code to make them into lower case however this did not work. I then printed into a txt file and it was completely fine. I then realised that the two capitalised words are singular words translating to "true" and "false", excel thinks that I want to write columns and is automatically capitalising them. Thus I left it in txt format as the txt format seems to work and is still readable through code.
+
+Day 4:
+
+Used code from api reference by chatgpt to make a basic text to speech generator. Tested all of the voices and they all sounded a bit odd and had foreign accents probably because they are optimised for english. So I decided on the google cloud api as an option due to the voices sounding good and the service being free.
+
+Day 5:
+Organised my project directory a little bit, watched videos on how to use google tts and ".gitignore". I have also decided on setting my api key as a permanent environmental variable on my computer as it is easier to use, it is my current only google project and it ensures that my api key is secure and not visible in git. I have also created a "Private" folder which contains my api key and any other sensitive information, it will be ignored so I can securely use my api key(s). Successfully ran a test with the "it-IT-Neural2-C" voice from google cloud, it sounded great and I will be using this voice for the flashcards. Made gpt API key an environmental variable for the same reason. Encountering errors with my current script, "'error': {'message': "'$.messages[1].content' is invalid.". Used print after each API call to figure out what the issue was, I found out that the generated completions consisted of different strings and variables so I ensured that only the generated content was isolated and used.
+
+Day 6: I wrapped the functions I created previously and incoporated them into a main.py function. I then created a small txt file called "3_words" which contain only 3 italian words so that I can work with a smaller data set and perfect my program before perfoming it on my 5000 word set. Successfully created 3 phrases, translations and definitions alongside successfully printing 3 word.mp3 and phrase.mp3 files.
+
+Day 7: Edited my anki template to include foreign word audio. I had a bit of an issue where the word would not play however it was fixed after using print to debug and using the internet for help. Fixed the anki template to include another card type so now the template contains two card types, Productive and Receptive which is ideal for language learning. I created a general toggle css class as i wished the receptive cards to contain a hint similar to the definition hint in the productive cards. Found out after testing that if you click on the audio you retoggle the hint which is not ideal, but I do not mind this issue and feel like it is not a priority to change at this point in time. Made the anki_template.py into a wrappable function.
+
+Day 8: Imported all anki to main, I created a new function where I will save the audio files in the anki media library so it can then be used on the cards. Had to refine the gpt prompts so that chat gpt understands that the words need to be translated are italian. For example "fare" is an italian word but it is also an english word which means something completely different. Also the anki note model has been generated from the test but the cards themselves have not.
+{'result': None, 'error': 'deck was not found: deckname'}
+While before my deck was being automatically created it is not anymore, so I need to define a function that creates a deck in anki. I also changed comments so it is easier to see where the user needs to change things so the code works for them. The code now works and with the 3 words I successfully created 6 cards with audio. However, I am not happy with the word translations eg "fare" should be "to do" but it is just "do", "andare" should be "to go" but it is just "go".  Though after some thought, it does seem to be minor and when translating words using deepl, the same output is given proving the the "to" is not necessary. Added an if error then prin line as if I am going to now use the 5000 words file then I only need to know if and when an error has occured. Was concerned as the number of added cards didnt seem to be going up, however they actually were added so I probably should not have stopped the program. I received many duplicate errors, so I wish to remove all of the duplicates before I begin again. The number of line (words) went from 5012 to 4635 meaning there were nearly 400 duplicates. I have observed the duplicate free document and compared it to the original document and can assume that the order is correct while the accents are aptly kept. Still recieved the duplicate warning:
+Error occurred at number 2 with the word (la): cannot create note because it is a duplicate
+Error occurred at number 8 with the word (lo): cannot create note because it is a duplicate
+This is likely due to them having the same translations to other words that are already in the anki notes, at first it seemed acceptable but then too many words were filtering through so I have decided to tell anki to allow duplicates. This shouldnt create a problem as there shouldnt be any words that are actual duplicates.
+
+Day 9: Ran the program yesterday it took, around 20 hours to complete, looking at the flashcards though there seem to be no errors and all words have been used. Success!
+
+Day 10: A reddit user pointed out some errors in my flashcards:
+
+yes
+The food is very good in this restaurant.
+si
+Si mangia molto bene in questo ristorante.
+
+da
+from
+Give your best every day.
+Da il meglio di te ogni giorno.
+
+Since I separately called the translations, the instance of chatgpt that translated the phrases must have not understood that the "si" and "da" were the key words in the sentences and just translated the phrase in an understandable manner. This resulted those words getting lost in translation, however I think it should only be a problem for the simpler words. I think it may have also happened to "da" due to the many translations the word could have.
+
+Day 11: After some usage I have found some words containing "Ã" and some excess symbols. I have checked my word sets and they both look fine so I cannot figure out why 130 of my words were read containing "Ã". Though I do not think the program is at fault here. I manually changed each word to the correct accent and then created a short code to change the word audio as well as a few phrase audios. The TTS API cannot recognise accented characters properly, I have tried to use SSML and IPA, however it is still not possible so I will just have to remember that the accented words are incorrectly pronounced.
