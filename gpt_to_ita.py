@@ -56,5 +56,8 @@ Requirements:
         translated_phrase = phrase_translation_future.result()
         translated_word = word_translation_future.result()
         word_definition = definition_future.result()
+    
+    # Small delay to avoid overwhelming API (4 calls per word × delay = requests spread over time)
+    time.sleep(0.3)
 
     return word, generated_phrase, translated_word, translated_phrase, word_definition

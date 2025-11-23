@@ -18,7 +18,7 @@ import time
 # Configuration
 CHECKPOINT_FILE = "progress_checkpoint.json"
 CHECKPOINT_INTERVAL = 100  # Save progress every 100 words
-MAX_WORKERS = 50  # Process 50 words concurrently (adjust based on rate limits)
+MAX_WORKERS = 15  # Process 15 words concurrently (Tier 1: 250 RPM / 4 calls per word ≈ 60, reduced for safety)
 
 def load_checkpoint():
     """Load progress from checkpoint file"""
@@ -70,7 +70,16 @@ def process_single_word(args):
         return {"index": i, "word": word, "success": True, "error": None}
         
     except Exception as e:
-        return {"index": i, "word": word, "success": False, "error": str(e)}
+        error_msg = str(e)
+        # Check if it's a quota error
+        is_quota_error = "quota" in error_msg.lower() or "429" in error_msg
+        return {
+            "index": i, 
+            "word": word, 
+            "success": False, 
+            "error": error_msg,
+            "quota_exceeded": is_quota_error
+        }
 
 def main():
     print("=" * 80)
@@ -97,17 +106,44 @@ def main():
     checkpoint = load_checkpoint()
     completed_indices = set(checkpoint["completed_indices"])
     
+    # Get words already in Anki to avoid wasting API calls
+    print("\n🔍 Checking existing cards in Anki...")
+    from anki_paste import invoke
+    result = invoke('findNotes', {'query': f'deck:"{deck_name}"'})
+    existing_note_ids = result.get('result', [])
+    
+    if existing_note_ids:
+        result = invoke('notesInfo', {'notes': existing_note_ids})
+        notes = result.get('result', [])
+        import re
+        existing_words = set()
+        for note in notes:
+            fields = note.get('fields', {})
+            foreign_word = fields.get('Foreign word', {}).get('value', '')
+            if foreign_word:
+                # Remove audio tags
+                foreign_word = re.sub(r'\[sound:.*?\]', '', foreign_word).strip()
+                existing_words.add(foreign_word)
+        print(f"   Found {len(existing_words)} existing cards in Anki")
+    else:
+        existing_words = set()
+        print(f"   No existing cards found")
+    
     if completed_indices:
         print(f"\n🔄 Resuming from checkpoint: {len(completed_indices)} words already processed")
     
-    # Filter out already completed words
-    words_to_process = [(i, word) for i, word in enumerate(words) if i not in completed_indices]
+    # Filter out already completed words AND words already in Anki
+    words_to_process = [
+        (i, word) for i, word in enumerate(words) 
+        if i not in completed_indices and word not in existing_words
+    ]
     
     if not words_to_process:
         print("\n✅ All words already processed!")
         return
     
-    print(f"   Words remaining: {len(words_to_process)}")
+    print(f"   Words to process: {len(words_to_process)}")
+    print(f"   (Skipping {len(words) - len(words_to_process)} already in Anki or checkpoint)")
     
     # Initialize shared resources (reuse across all words)
     print("\n🔧 Initializing API clients...")
@@ -122,6 +158,7 @@ def main():
     start_time = time.time()
     errors = []
     successful_count = 0
+    quota_exceeded = False
     
     # Create argument tuples for parallel processing
     args_list = [
@@ -143,6 +180,16 @@ def main():
                 else:
                     errors.append(result)
                     print(f"\n⚠️  Error with word {result['index']} ({result['word']}): {result['error']}")
+                    
+                    # Check if quota exceeded
+                    if result.get("quota_exceeded", False):
+                        quota_exceeded = True
+                
+                # If quota exceeded, stop submitting new work
+                if quota_exceeded:
+                    print("\n🛑 Quota limit detected - stopping gracefully...")
+                    print("   Waiting for in-flight requests to complete...")
+                    break
                 
                 pbar.update(1)
                 
@@ -162,22 +209,32 @@ def main():
     # Print summary
     elapsed_time = time.time() - start_time
     print("\n" + "=" * 80)
-    print("PROCESSING COMPLETE")
-    print("=" * 80)
-    print(f"✅ Successfully processed: {successful_count}/{len(words_to_process)} words")
-    print(f"❌ Errors: {len(errors)}")
-    print(f"⏱️  Total time: {elapsed_time:.2f} seconds ({elapsed_time/60:.2f} minutes)")
-    print(f"📊 Average time per word: {elapsed_time/len(words_to_process):.2f} seconds")
     
-    if errors:
+    if quota_exceeded:
+        print("QUOTA LIMIT REACHED - GRACEFUL SHUTDOWN")
+        print("=" * 80)
+        print(f"✅ Successfully processed: {successful_count}/{len(words_to_process)} words before quota limit")
+        print(f"💾 Progress saved to checkpoint file")
+        print(f"⏱️  Total time: {elapsed_time:.2f} seconds ({elapsed_time/60:.2f} minutes)")
+        print(f"\n📅 Quota resets at midnight Pacific time")
+        print(f"🔄 Run 'python.exe main.py' again tomorrow to continue from where you left off")
+    else:
+        print("PROCESSING COMPLETE")
+        print("=" * 80)
+        print(f"✅ Successfully processed: {successful_count}/{len(words_to_process)} words")
+        print(f"❌ Errors: {len(errors)}")
+        print(f"⏱️  Total time: {elapsed_time:.2f} seconds ({elapsed_time/60:.2f} minutes)")
+        print(f"📊 Average time per word: {elapsed_time/len(words_to_process):.2f} seconds")
+    
+    if errors and not quota_exceeded:
         print(f"\n⚠️  Errors occurred with {len(errors)} words:")
         for error in errors[:10]:  # Show first 10 errors
             print(f"   - Word {error['index']} ({error['word']}): {error['error']}")
         if len(errors) > 10:
             print(f"   ... and {len(errors) - 10} more errors")
-    
-    print("\n💾 Progress saved to checkpoint file")
-    print(f"   To restart from checkpoint, just run this script again")
+        
+        print("\n💾 Progress saved to checkpoint file")
+        print(f"   To retry failed words, just run this script again")
 
 if __name__ == "__main__":
     main()
