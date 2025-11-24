@@ -14,6 +14,8 @@ import os
 import json
 from tqdm import tqdm
 import time
+import signal
+import sys
 
 # Configuration
 CHECKPOINT_FILE = "progress_checkpoint.json"
@@ -86,6 +88,23 @@ def main():
     print("OPTIMIZED ANKI FLASHCARD GENERATION")
     print("=" * 80)
     
+    # Set up graceful interrupt handler
+    interrupted = {"value": False}
+    completed_indices = set()
+    
+    def signal_handler(sig, frame):
+        """Handle Ctrl+C gracefully"""
+        if not interrupted["value"]:
+            interrupted["value"] = True
+            print("\n\n🛑 Manual stop requested (Ctrl+C detected)...")
+            print("   Finishing current batch and saving checkpoint...")
+            print("   Press Ctrl+C again to force quit (will lose progress)\n")
+        else:
+            print("\n❌ Force quit - progress since last checkpoint will be lost!")
+            sys.exit(1)
+    
+    signal.signal(signal.SIGINT, signal_handler)
+    
     # Create Anki model and deck
     model_name = "your_model_name"
     deck_name = "your_deck_name"
@@ -104,7 +123,7 @@ def main():
     
     # Load checkpoint to resume if interrupted
     checkpoint = load_checkpoint()
-    completed_indices = set(checkpoint["completed_indices"])
+    completed_indices.update(checkpoint["completed_indices"])
     
     # Get words already in Anki to avoid wasting API calls
     print("\n🔍 Checking existing cards in Anki...")
@@ -185,10 +204,14 @@ def main():
                     if result.get("quota_exceeded", False):
                         quota_exceeded = True
                 
-                # If quota exceeded, stop submitting new work
+                # If quota exceeded or manually interrupted, stop submitting new work
                 if quota_exceeded:
                     print("\n🛑 Quota limit detected - stopping gracefully...")
                     print("   Waiting for in-flight requests to complete...")
+                    break
+                
+                if interrupted["value"]:
+                    print("   Stopping after current batch completes...")
                     break
                 
                 pbar.update(1)
@@ -210,7 +233,14 @@ def main():
     elapsed_time = time.time() - start_time
     print("\n" + "=" * 80)
     
-    if quota_exceeded:
+    if interrupted["value"]:
+        print("MANUALLY STOPPED")
+        print("=" * 80)
+        print(f"✅ Successfully processed: {successful_count}/{len(words_to_process)} words before manual stop")
+        print(f"💾 Progress saved to checkpoint file")
+        print(f"⏱️  Total time: {elapsed_time:.2f} seconds ({elapsed_time/60:.2f} minutes)")
+        print(f"\n🔄 Run 'python.exe main.py' again to continue from where you left off")
+    elif quota_exceeded:
         print("QUOTA LIMIT REACHED - GRACEFUL SHUTDOWN")
         print("=" * 80)
         print(f"✅ Successfully processed: {successful_count}/{len(words_to_process)} words before quota limit")
