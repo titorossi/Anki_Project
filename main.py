@@ -19,7 +19,7 @@ import sys
 
 # Configuration
 CHECKPOINT_FILE = "progress_checkpoint.json"
-CHECKPOINT_INTERVAL = 100  # Save progress every 100 words
+CHECKPOINT_INTERVAL = 50  # Save progress every 50 words
 MAX_WORKERS = 15  # Process 15 words concurrently (Tier 1: 250 RPM / 4 calls per word ≈ 60, reduced for safety)
 
 def load_checkpoint():
@@ -99,6 +99,13 @@ def main():
             print("\n\n🛑 Manual stop requested (Ctrl+C detected)...")
             print("   Finishing current batch and saving checkpoint...")
             print("   Press Ctrl+C again to force quit (will lose progress)\n")
+            # Save current progress immediately
+            if completed_indices:
+                save_checkpoint({
+                    "completed_indices": list(completed_indices),
+                    "last_index": max(completed_indices)
+                })
+                print(f"   💾 Saved {len(completed_indices)} completed words to checkpoint\n")
         else:
             print("\n❌ Force quit - progress since last checkpoint will be lost!")
             sys.exit(1)
@@ -161,8 +168,15 @@ def main():
         print("\n✅ All words already processed!")
         return
     
+    skipped_by_checkpoint = len([i for i in range(len(words)) if i in completed_indices])
+    skipped_by_anki = len([word for word in words if word in existing_words])
+    total_unique_skipped = len(words) - len(words_to_process)
+    
     print(f"   Words to process: {len(words_to_process)}")
-    print(f"   (Skipping {len(words) - len(words_to_process)} already in Anki or checkpoint)")
+    print(f"   Skipped (total unique): {total_unique_skipped}")
+    print(f"     - In checkpoint: {skipped_by_checkpoint}")
+    print(f"     - In Anki: {skipped_by_anki}")
+    print(f"     - (Some words may be counted in both)")
     
     # Initialize shared resources (reuse across all words)
     print("\n🔧 Initializing API clients...")
@@ -172,7 +186,6 @@ def main():
     
     # Process words in parallel
     print(f"\n🚀 Processing {len(words_to_process)} words with {MAX_WORKERS} concurrent workers...")
-    print("   (This will be significantly faster than the sequential version)\n")
     
     start_time = time.time()
     errors = []
@@ -196,6 +209,13 @@ def main():
                 if result["success"]:
                     successful_count += 1
                     completed_indices.add(result["index"])
+                    
+                    # Save checkpoint periodically
+                    if len(completed_indices) % CHECKPOINT_INTERVAL == 0:
+                        save_checkpoint({
+                            "completed_indices": list(completed_indices),
+                            "last_index": max(completed_indices)
+                        })
                 else:
                     errors.append(result)
                     print(f"\n⚠️  Error with word {result['index']} ({result['word']}): {result['error']}")
@@ -208,6 +228,12 @@ def main():
                 if quota_exceeded:
                     print("\n🛑 Quota limit detected - stopping gracefully...")
                     print("   Waiting for in-flight requests to complete...")
+                    # Save checkpoint immediately on quota error
+                    if completed_indices:
+                        save_checkpoint({
+                            "completed_indices": list(completed_indices),
+                            "last_index": max(completed_indices)
+                        })
                     break
                 
                 if interrupted["value"]:
@@ -215,13 +241,6 @@ def main():
                     break
                 
                 pbar.update(1)
-                
-                # Save checkpoint periodically
-                if len(completed_indices) % CHECKPOINT_INTERVAL == 0:
-                    save_checkpoint({
-                        "completed_indices": list(completed_indices),
-                        "last_index": max(completed_indices)
-                    })
     
     # Final checkpoint save
     save_checkpoint({
