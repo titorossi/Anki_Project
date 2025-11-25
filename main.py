@@ -159,10 +159,28 @@ def main():
         print(f"\n🔄 Resuming from checkpoint: {len(completed_indices)} words already processed")
     
     # Filter out already completed words AND words already in Anki
-    words_to_process = [
-        (i, word) for i, word in enumerate(words) 
-        if i not in completed_indices and word not in existing_words
-    ]
+    # Also mark words that exist in Anki as completed in checkpoint
+    words_to_process = []
+    words_skipped_in_anki = 0
+    
+    for i, word in enumerate(words):
+        if i in completed_indices:
+            continue  # Already in checkpoint
+        elif word in existing_words:
+            # Word exists in Anki but not in checkpoint - mark as completed
+            completed_indices.add(i)
+            words_skipped_in_anki += 1
+        else:
+            # Need to process this word
+            words_to_process.append((i, word))
+    
+    # Save updated checkpoint if we added any Anki cards to it
+    if words_skipped_in_anki > 0:
+        save_checkpoint({
+            "completed_indices": list(completed_indices),
+            "last_index": max(completed_indices)
+        })
+        print(f"   📝 Updated checkpoint: added {words_skipped_in_anki} words found in Anki")
     
     if not words_to_process:
         print("\n✅ All words already processed!")
